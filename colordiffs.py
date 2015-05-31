@@ -156,10 +156,12 @@ def file_contents_at_commit(filename, commit):
     # if commit.startswith('3'):
     #     return 'print %s\nprint 1\nprint 2\n' % commit
     output = subprocess.check_output(['git', 'show', git_object])
+    return output
 
 def git_object_name(filename, commit):
-    return '%(commit)s:%(filename)s' % {
-        'commit': commit, 'filename': filename}
+    return commit
+    # return '%(commit)s:%(filename)s' % {
+    #     'commit': commit, 'filename': filename}
 
 def grab_filename(diff):
     """
@@ -169,7 +171,7 @@ def grab_filename(diff):
     """
     filenames = diff[0]
     _, _, file1, file2 = filenames.split(' ')
-    return file1[2:], file2[2:]
+    return file1[2:].strip(), file2[2:].strip()
 
 def grab_commits(diff):
     """
