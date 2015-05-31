@@ -151,11 +151,11 @@ def lines_of_output(output, start, end):
 
 def file_contents_at_commit(filename, commit):
     git_object = git_object_name(filename, commit)
-    if commit.startswith('f'):
-        return 'print %s\nprint 1\n' % commit
-    if commit.startswith('3'):
-        return 'print %s\nprint 1\nprint 2\n' % commit
-    # output = subprocess.check_output(['git', 'show', git_object])
+    # if commit.startswith('f'):
+    #     return 'print %s\nprint 1\n' % commit
+    # if commit.startswith('3'):
+    #     return 'print %s\nprint 1\nprint 2\n' % commit
+    output = subprocess.check_output(['git', 'show', git_object])
 
 def git_object_name(filename, commit):
     return '%(commit)s:%(filename)s' % {
@@ -182,8 +182,8 @@ def grab_commits(diff):
     return old, new
 
 
-def main():
-    diff = [
+def main(diff):
+    diff = diff or [
         "diff --git a/.vimrc b/.vimrc",
         "index fa90906..313a9b4 100644",
         "--- a/.vimrc",
@@ -210,6 +210,8 @@ def main():
             print o
 
 if __name__ == '__main__':
-    main()
+    f = open('test.diff')
+    diff = f.readlines()
+    main(diff)
     import doctest
     doctest.testmod()
