@@ -1,39 +1,117 @@
-from itertools import dropwhile, takewhile
 import re
 import subprocess
 
 from pygments import highlight
-from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import guess_lexer, guess_lexer_for_filename
 
-def read_chunks(lines):
-    """
-    >>> lines = [
-    ... "prelude",
-    ... "@@ -11,7 +11,8 @@ class Klass",
-    ... " line 1",
-    ... "+line 2",
-    ... "@@ -11,7 +11,8 @@ class Klass",
-    ... " line 1"]
-    >>> read_chunks(lines)
-    [['@@ -11,7 +11,8 @@ class Klass', ' line 1', '+line 2'], ['@@ -11,7 +11,8 @@ class Klass', ' line 1']]
-    """
-    started = False
-    start_no = 0
-    chunks = []
-    for no, line in enumerate(lines):
-        if line.startswith('@@'):
-            if not started:
-                started = True
+
+class Diff():
+    def __init__(self, diff, a, b):
+        self.a = a
+        self.b = b
+        self.diff = diff
+        self.commits = []
+        self.chunks = []
+        self.parse_diff()
+
+    def parse_diff(self):
+        self.header = self.diff[0].strip()
+        self.index = self.diff[1].strip()
+        self.line_a = self.diff[2].strip()
+        self.line_b = self.diff[3].strip()
+        self.spec = self.diff[4:]
+
+        self.parse_commits()
+        self.grab_filename()
+        self.read_chunks()
+
+        self.dcs = []
+        for chunk in self.chunks:
+            self.dcs.append(DiffChunk(chunk, self.a, self.b))
+
+    def parse_commits(self):
+        """
+        >>> diff = [
+        ... "diff --git a/.vimrc b/.vimrc",
+        ... "index fa90906..313a9b4 100644",
+        ... "--- a/.vimrc",
+        ... "+++ b/.vimrc",
+        ... "@@ -1,1 +1,2 @@ class Klass",
+        ... " line 1",
+        ... "+line 2",
+        ... ]
+        >>> d = Diff(diff, None, None)
+        >>> d.commits
+        ['fa90906', '313a9b4']
+        """
+        _, old, new, __ = re.split('\.\.| ', self.index)
+        self.commits = [old, new]
+
+    def grab_filename(self):
+        """
+        >>> diff = [
+        ... "diff --git a/.vimrc b/.vimrc",
+        ... "index fa90906..313a9b4 100644",
+        ... "--- a/.vimrc",
+        ... "+++ b/.vimrc",
+        ... "@@ -1,1 +1,2 @@ class Klass",
+        ... " line 1",
+        ... "+line 2",
+        ... ]
+        >>> d = Diff(diff, None, None)
+        >>> d.grab_filename()
+        ('.vimrc', '.vimrc')
+        """
+        _, _, file1, file2 = self.header.split(' ')
+        return file1[2:].strip(), file2[2:].strip()
+
+    def read_chunks(self):
+        """
+        >>> diff = [
+        ... "diff --git a/.vimrc b/.vimrc",
+        ... "index fa90906..313a9b4 100644",
+        ... "--- a/.vimrc",
+        ... "+++ b/.vimrc",
+        ... "@@ -1,1 +1,2 @@ class Klass",
+        ... " line 1",
+        ... "+line 2",
+        ... "@@ -11,1 +11,1 @@ class Klass",
+        ... "-line 1",
+        ... "+line 2",
+        ... ]
+        >>> d = Diff(diff, None, None)
+        >>> d.read_chunks()
+        >>> d.chunks[0]
+        ['@@ -1,1 +1,2 @@ class Klass', ' line 1', '+line 2']
+        >>> d.chunks[1]
+        ['@@ -11,1 +11,1 @@ class Klass', '-line 1', '+line 2']
+        """
+        started = False
+        start_no = 0
+        chunks = []
+        for no, line in enumerate(self.spec):
+            if line.startswith('@@'):
+                if not started:
+                    started = True
+                    start_no = no
+                    continue
+                chunk = self.spec[start_no:no]
+                chunks.append(chunk)
                 start_no = no
-                continue
-            chunk = lines[start_no:no]
-            chunks.append(chunk)
-            start_no = no
-    chunk = lines[start_no:no+1]
-    chunks.append(chunk)
-    return chunks
+        chunk = self.spec[start_no:]
+        chunks.append(chunk)
+        self.chunks = chunks
+
+    def output(self):
+        print(self.header)
+        print(self.index)
+        print(self.line_a)
+        print(self.line_b)
+        for dc in self.dcs:
+            for o in dc.output():
+                print(o.strip())
+
 
 class DiffChunk():
     def __init__(self, spec, a, b):
@@ -61,10 +139,10 @@ class DiffChunk():
         >>> dc.b_hunk.num_lines
         8
         """
-        diff_line = self._spec[0]
+        self.diff_line = self._spec[0]
         self.output_instructions = self._spec[1:]
 
-        _, line_spec, _ = diff_line.split('@@')
+        _, line_spec, _ = self.diff_line.split('@@')
         a_spec, b_spec = line_spec.strip().split(' ')
 
         a_start, a_more = a_spec.split(',')
@@ -72,7 +150,6 @@ class DiffChunk():
 
         b_start, b_more = b_spec.split(',')
         self.b_hunk = DiffHunk(b_start[1:], b_more, self.b)
-
 
     def output(self):
         """
@@ -88,9 +165,9 @@ class DiffChunk():
         >>> dc.output_instructions
         [' line 1a', '-line 2a', '+line 2b', '+line 3b']
         >>> dc.output()
-        [' line 1a', '-line 2a', '+line 2b', '+line 3b']
+        ['@@ -1,2 +1,3 @@ class Klass', ' line 1a', '-line 2a', '+line 2b', '+line 3b']
         """
-        results = []
+        results = [self.diff_line]
         for instr in self.output_instructions:
             if instr[0] == ' ':
                 results.append(' ' + self.a_hunk.get_current_line())
@@ -132,10 +209,11 @@ def colordiffs(diff):
     file1, file2 = grab_filename(diff)
 
     old_code = colorize(
-        file_contents_at_commit(file1, old_commit), file1)
+        file_contents_at_commit(old_commit), file1)
     new_code = colorize(
-        file_contents_at_commit(file2, new_commit), file2)
+        file_contents_at_commit(new_commit), file2)
     return old_code, new_code
+
 
 def colorize(code, filename=None):
     if filename is not None:
@@ -146,26 +224,21 @@ def colorize(code, filename=None):
     result = highlight(code, lexer, formatter)
     return result
 
-def lines_of_output(output, start, end):
-    return output[start-1:end+1]
 
-def file_contents_at_commit(filename, commit):
-    git_object = git_object_name(filename, commit)
-    # if commit.startswith('f'):
-    #     return 'print %s\nprint 1\n' % commit
-    # if commit.startswith('3'):
-    #     return 'print %s\nprint 1\nprint 2\n' % commit
-    output = subprocess.check_output(['git', 'show', git_object])
+def file_contents_at_commit(git_obj):
+    # if obj.startswith('f'):
+    #     return 'print %s\nprint 1\n' % obj
+    # if obj.startswith('3'):
+    #     return 'print %s\nprint 1\nprint 2\n' % obj
+    output = subprocess.check_output(['git', 'show', git_obj])
     return output
 
-def git_object_name(filename, commit):
-    return commit
-    # return '%(commit)s:%(filename)s' % {
-    #     'commit': commit, 'filename': filename}
 
 def grab_filename(diff):
     """
-    >>> diff = ["diff --git a/.vimrc b/.vimrc", "index fa90906..313a9b4 100644"]
+    >>> diff = [
+    ... "diff --git a/.vimrc b/.vimrc",
+    ... "index fa90906..313a9b4 100644"]
     >>> grab_filename(diff)
     ('.vimrc', '.vimrc')
     """
@@ -173,9 +246,12 @@ def grab_filename(diff):
     _, _, file1, file2 = filenames.split(' ')
     return file1[2:].strip(), file2[2:].strip()
 
+
 def grab_commits(diff):
     """
-    >>> diff = ["diff --git a/.vimrc b/.vimrc", "index fa90906..313a9b4 100644"]
+    >>> diff = [
+    ... "diff --git a/.vimrc b/.vimrc",
+    ... "index fa90906..313a9b4 100644"]
     >>> grab_commits(diff)
     ('fa90906', '313a9b4')
     """
@@ -203,17 +279,12 @@ def main(diff):
     b = b.split('\n')
     if b[-1] == '':
         b = b[:-1]
-    dcs = []
-    for chunk in read_chunks(diff):
-        dcs.append(DiffChunk(chunk, a, b))
-
-    for dc in dcs:
-        for o in dc.output():
-            print o
+    a_diff = Diff(diff, a, b)
+    a_diff.output()
 
 if __name__ == '__main__':
-    f = open('test.diff')
-    diff = f.readlines()
-    main(diff)
+    # f = open('test.diff')
+    # diff = f.readlines()
+    # main(diff)
     import doctest
     doctest.testmod()
