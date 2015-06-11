@@ -2,8 +2,10 @@ import re
 import subprocess
 
 from pygments import highlight
+from pygments.console import codes, dark_colors, light_colors, esc
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import guess_lexer, guess_lexer_for_filename
+from pygments.console import ansiformat
 
 
 class Diff():
@@ -104,13 +106,17 @@ class Diff():
         self.chunks = chunks
 
     def output(self):
-        print(self.header)
-        print(self.index)
-        print(self.line_a)
-        print(self.line_b)
+        print(discreet(self.header))
+        print(discreet(self.index))
+        print(discreet(self.line_a))
+        print(discreet(self.line_b))
         for dc in self.dcs:
             for o in dc.output():
                 print(o.strip())
+
+
+def discreet(text):
+    return ansiformat('red', text)
 
 
 class DiffChunk():
@@ -173,10 +179,22 @@ class DiffChunk():
                 results.append(' ' + self.a_hunk.get_current_line())
                 self.b_hunk.get_current_line()  # for side effect
             if instr[0] == '-':
-                results.append('-' + self.a_hunk.get_current_line())
+                results.append(red_bg('-') + self.a_hunk.get_current_line())
             if instr[0] == '+':
-                results.append('+' + self.b_hunk.get_current_line())
+                results.append(green_bg('+') + self.b_hunk.get_current_line())
         return results
+
+
+def green_bg(text):
+    if 'green_bg' not in codes:
+        return text
+    return ansiformat('green_bg', text)
+
+
+def red_bg(text):
+    if 'red_bg' not in codes:
+        return text
+    return ansiformat('red_bg', text)
 
 
 class DiffHunk():
