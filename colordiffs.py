@@ -112,11 +112,11 @@ class Diff():
         print(discreet(self.line_b))
         for dc in self.dcs:
             for o in dc.output():
-                print(o.strip())
+                print o
 
 
 def discreet(text):
-    return ansiformat('red', text)
+    return ansiformat('faint', ansiformat('lightgray', text))
 
 
 class DiffChunk():
@@ -173,7 +173,7 @@ class DiffChunk():
         >>> dc.output()
         ['@@ -1,2 +1,3 @@ class Klass', ' line 1a', '-line 2a', '+line 2b', '+line 3b']
         """
-        results = [self.diff_line]
+        results = [discreet(self.diff_line)]
         for instr in self.output_instructions:
             if instr[0] == ' ':
                 results.append(' ' + self.a_hunk.get_current_line())
@@ -186,15 +186,11 @@ class DiffChunk():
 
 
 def green_bg(text):
-    if 'green_bg' not in codes:
-        return text
-    return ansiformat('green_bg', text)
+    return ansiformat('green', text)
 
 
 def red_bg(text):
-    if 'red_bg' not in codes:
-        return text
-    return ansiformat('red_bg', text)
+    return ansiformat('red', text)
 
 
 class DiffHunk():
