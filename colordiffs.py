@@ -304,9 +304,22 @@ def main(diff):
     a_diff = Diff(diff, a, b)
     a_diff.output()
 
+def patch_codes():
+    dark_bg = [s + '_bg' for s in dark_colors]
+    light_bg = [s + '_bg' for s in light_colors]
+
+    x = 40
+    for d, l in zip(dark_bg, light_bg):
+        codes[d] = esc + "%im" % x
+        codes[l] = esc + "%i;01m" % x
+        x += 1
+
 if __name__ == '__main__':
-    # f = open('test.diff')
-    # diff = f.readlines()
-    # main(diff)
-    import doctest
-    doctest.testmod()
+    import sys
+    if len(sys.argv) > 1:
+        import doctest
+        doctest.testmod()
+    else:
+        patch_codes()
+        lines = [line for line in sys.stdin]
+        main(lines)
