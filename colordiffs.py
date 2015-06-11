@@ -209,9 +209,9 @@ def colordiffs(diff):
     file1, file2 = grab_filename(diff)
 
     old_code = colorize(
-        file_contents_at_commit(old_commit), file1)
+        file_contents_at_commit(old_commit, file1), file1)
     new_code = colorize(
-        file_contents_at_commit(new_commit), file2)
+        file_contents_at_commit(new_commit, file2), file2)
     return old_code, new_code
 
 
@@ -225,12 +225,16 @@ def colorize(code, filename=None):
     return result
 
 
-def file_contents_at_commit(git_obj):
+def file_contents_at_commit(git_obj, filename):
     # if obj.startswith('f'):
     #     return 'print %s\nprint 1\n' % obj
     # if obj.startswith('3'):
     #     return 'print %s\nprint 1\nprint 2\n' % obj
-    output = subprocess.check_output(['git', 'show', git_obj])
+    try:
+        # this is probably HEAD, just use cat to get file contents
+        output = subprocess.check_output(['git', 'show', git_obj])
+    except subprocess.CalledProcessError:
+        output = subprocess.check_output(['cat', filename])
     return output
 
 
