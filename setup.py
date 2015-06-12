@@ -12,7 +12,7 @@ def readme():
 
 setup(
     name='colordiffs',
-    version='0.1.0',
+    version='0.1.1',
     description='Syntax highlights for your git diffs',
     author='Ng Zhi An',
     author_email='ngzhian@gmail.com',
