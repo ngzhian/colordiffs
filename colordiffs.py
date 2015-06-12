@@ -286,7 +286,7 @@ def grab_commits(diff):
     return old, new
 
 
-def main(diff):
+def run(diff):
     diff = diff or [
         "diff --git a/.vimrc b/.vimrc",
         "index fa90906..313a9b4 100644",
@@ -332,6 +332,12 @@ def red_bg(text):
 def discreet(text):
     return ansiformat('faint', ansiformat('lightgray', text))
 
+def main():
+    import sys
+    patch_codes()
+    lines = [line for line in sys.stdin]
+    if lines:
+        run(lines)
 
 if __name__ == '__main__':
     import sys
@@ -339,7 +345,4 @@ if __name__ == '__main__':
         import doctest
         doctest.testmod()
     else:
-        patch_codes()
-        lines = [line for line in sys.stdin]
-        if lines:
-            main(lines)
+        main()

@@ -17,7 +17,6 @@ setup(
     author='Ng Zhi An',
     author_email='ngzhian@gmail.com',
     url='https://github.com/ngzhian/colordiffs',
-    scripts=['colordiffs.py'],
     long_description=readme(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -31,5 +30,6 @@ setup(
     ],
     install_requires=[
         "Pygments>=2.0.2",
-    ]
+    ],
+    scripts=['scripts/colordiffs'],
 )
