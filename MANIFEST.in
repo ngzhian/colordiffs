@@ -1,0 +1,4 @@
+include README
+include colordiffs.py
+include setup.py
+include scripts/colordiffs
