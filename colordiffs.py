@@ -234,13 +234,13 @@ def colorize(code, filename=None):
     result = highlight(code, lexer, formatter)
     return result
 
+
 class NoneLexer(Lexer):
     def analyse_text(text):
         return 1
 
     def get_tokens_unprocessed(sef, text):
         return [(0, Text, text)]
-
 
 
 def file_contents_at_commit(git_obj, filename):
@@ -308,6 +308,7 @@ def run(diff):
     a_diff = Diff(diff, a, b)
     a_diff.output()
 
+
 def patch_codes():
     dark_bg = [s + '_bg' for s in dark_colors]
     light_bg = [s + '_bg' for s in light_colors]
@@ -331,6 +332,7 @@ def red_bg(text):
 
 def discreet(text):
     return ansiformat('faint', ansiformat('lightgray', text))
+
 
 def main():
     import sys
