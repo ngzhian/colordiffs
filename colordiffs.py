@@ -116,10 +116,6 @@ class Diff():
                 print o
 
 
-def discreet(text):
-    return ansiformat('faint', ansiformat('lightgray', text))
-
-
 class DiffChunk():
     def __init__(self, spec, a, b):
         """spec is a list of lines"""
@@ -184,14 +180,6 @@ class DiffChunk():
             if instr[0] == '+':
                 results.append(green_bg('+') + self.b_hunk.get_current_line())
         return results
-
-
-def green_bg(text):
-    return ansiformat('green', text)
-
-
-def red_bg(text):
-    return ansiformat('red', text)
 
 
 class DiffHunk():
@@ -325,3 +313,17 @@ if __name__ == '__main__':
         lines = [line for line in sys.stdin]
         if lines:
             main(lines)
+
+# helpers to ansi escape text
+
+
+def green_bg(text):
+    return ansiformat('green', text)
+
+
+def red_bg(text):
+    return ansiformat('red', text)
+
+
+def discreet(text):
+    return ansiformat('faint', ansiformat('lightgray', text))
