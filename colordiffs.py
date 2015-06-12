@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 
@@ -244,11 +245,15 @@ def file_contents_at_commit(git_obj, filename):
     #     return 'print %s\nprint 1\n' % obj
     # if obj.startswith('3'):
     #     return 'print %s\nprint 1\nprint 2\n' % obj
+    f = open(os.devnull, 'w')
     try:
         # this is probably HEAD, just use cat to get file contents
-        output = subprocess.check_output(['git', 'show', git_obj])
+        output = subprocess.check_output(
+            ['git', 'show', git_obj], stderr=f)
     except subprocess.CalledProcessError:
-        output = subprocess.check_output(['cat', filename])
+        output = subprocess.check_output(
+            ['cat', filename])
+    f.close()
     return output
 
 
@@ -318,4 +323,5 @@ if __name__ == '__main__':
     else:
         patch_codes()
         lines = [line for line in sys.stdin]
-        main(lines)
+        if lines:
+            main(lines)
