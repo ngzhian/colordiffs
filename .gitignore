@@ -1,0 +1,4 @@
+MANIFEST
+*.egg-info/
+dist
+test.diff
