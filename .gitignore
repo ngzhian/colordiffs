@@ -2,3 +2,4 @@ MANIFEST
 *.egg-info/
 dist
 test.diff
+build/
