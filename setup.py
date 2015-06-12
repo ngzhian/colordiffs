@@ -4,7 +4,7 @@ from distutils.core import setup
 
 
 def readme():
-    f = open('README')
+    f = open('README.rst')
     info = f.read()
     f.close()
     return info
@@ -12,7 +12,7 @@ def readme():
 
 setup(
     name='colordiffs',
-    version='0.1.3',
+    version='0.1.4',
     description='Syntax highlights for your git diffs',
     author='Ng Zhi An',
     author_email='ngzhian@gmail.com',
