@@ -4,7 +4,7 @@ from distutils.core import setup
 
 
 def readme():
-    f = open('README.rst')
+    f = open('README')
     info = f.read()
     f.close()
     return info
