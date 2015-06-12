@@ -7,6 +7,7 @@ from pygments.console import codes, dark_colors, light_colors, esc
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import guess_lexer, guess_lexer_for_filename
 from pygments.console import ansiformat
+from pygments.util import ClassNotFound
 
 
 class Diff():
@@ -219,13 +220,21 @@ def colordiffs(diff):
 
 
 def colorize(code, filename=None):
-    if filename is not None:
-        lexer = guess_lexer_for_filename(filename, code)
-    else:
-        lexer = guess_lexer(code)
+    try:
+        if filename is not None:
+            lexer = guess_lexer_for_filename(filename, code)
+        else:
+            lexer = guess_lexer(code)
+    except ClassNotFound:
+        lexer = NoneLexer()
+
     formatter = TerminalFormatter()
     result = highlight(code, lexer, formatter)
     return result
+
+class NoneLexer(object):
+    tokens = {}
+
 
 
 def file_contents_at_commit(git_obj, filename):
@@ -303,17 +312,6 @@ def patch_codes():
         codes[l] = esc + "%i;01m" % x
         x += 1
 
-if __name__ == '__main__':
-    import sys
-    if len(sys.argv) > 1:
-        import doctest
-        doctest.testmod()
-    else:
-        patch_codes()
-        lines = [line for line in sys.stdin]
-        if lines:
-            main(lines)
-
 # helpers to ansi escape text
 
 
@@ -327,3 +325,15 @@ def red_bg(text):
 
 def discreet(text):
     return ansiformat('faint', ansiformat('lightgray', text))
+
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1:
+        import doctest
+        doctest.testmod()
+    else:
+        patch_codes()
+        lines = [line for line in sys.stdin]
+        if lines:
+            main(lines)
