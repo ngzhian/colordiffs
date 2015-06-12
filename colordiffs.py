@@ -3,10 +3,12 @@ import re
 import subprocess
 
 from pygments import highlight
+from pygments.console import ansiformat
 from pygments.console import codes, dark_colors, light_colors, esc
 from pygments.formatters import TerminalFormatter
+from pygments.lexer import Lexer
 from pygments.lexers import guess_lexer, guess_lexer_for_filename
-from pygments.console import ansiformat
+from pygments.token import Text
 from pygments.util import ClassNotFound
 
 
@@ -232,8 +234,12 @@ def colorize(code, filename=None):
     result = highlight(code, lexer, formatter)
     return result
 
-class NoneLexer(object):
-    tokens = {}
+class NoneLexer(Lexer):
+    def analyse_text(text):
+        return 1
+
+    def get_tokens_unprocessed(sef, text):
+        return [(0, Text, text)]
 
 
 
