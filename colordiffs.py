@@ -116,7 +116,7 @@ class Diff():
         print(discreet(self.line_b))
         for dc in self.dcs:
             for o in dc.output():
-                print o
+                print(o)
 
 
 class DiffChunk():
