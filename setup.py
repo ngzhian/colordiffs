@@ -17,7 +17,7 @@ setup(
     author='Ng Zhi An',
     author_email='ngzhian@gmail.com',
     url='https://github.com/ngzhian/colordiffs',
-    py_modules=['colordiffs'],
+    packages=['colordiffs'],
     long_description=readme(),
     classifiers=[
         "Development Status :: 4 - Beta",

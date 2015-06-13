@@ -1,5 +1,5 @@
 #!/usr/bin/python
 
-from colordiffs import main
+from colordiffs import cmdline
 
-main()
+cmdline.main()
