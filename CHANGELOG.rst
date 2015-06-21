@@ -1,3 +1,9 @@
+v0.1.7
+======
+
+* support diffs where files are removed or added
+
+
 v0.1.6
 ======
 
