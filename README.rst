@@ -36,10 +36,10 @@ Requirements
 
 ::
 
-    Python 2.x
+    Python 2.x, 3.x
     Pygments
 
 TODO
 ====
 
-Python 3 (this shouldn't be difficult)
+Support more kinds of `git diff` output. Right not it supports the most common `---` `+++` diffs, but if the diff is for a new file or deletion of file it breaks.

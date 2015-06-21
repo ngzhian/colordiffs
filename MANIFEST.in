@@ -1,4 +1,4 @@
 include README.rst
-include colordiffs.py
+recursive-include colordiffs *.py
 include setup.py
 include scripts/colordiffs
