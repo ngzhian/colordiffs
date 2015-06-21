@@ -1,3 +1,4 @@
+from itertools import takewhile
 import os
 import re
 import subprocess
@@ -36,11 +37,15 @@ def colorize(code, filename=None):
         lexer = NoneLexer()
 
     formatter = TerminalFormatter()
-    result = highlight(code, lexer, formatter)
+
+    # some fix for empty lines initially
+    num_nl = len(list(takewhile(lambda c: c == '\n', iter(code))))
+    result = num_nl * '\n' + highlight(code, lexer, formatter)
     result = result.split('\n')
 
     if result[-1] == '':
         return result[:-1]
+
     return result
 
 
@@ -49,10 +54,10 @@ def file_contents_at_commit(git_obj, filename):
     try:
         # this is probably HEAD, just use cat to get file contents
         output = subprocess.check_output(
-            ['git', 'show', git_obj], stderr=f)
+            ['git', 'show', git_obj], stderr=f, universal_newlines=True)
     except subprocess.CalledProcessError:
         output = subprocess.check_output(
-            ['cat', filename])
+            ['cat', filename], universal_newlines=True)
     f.close()
     return output
 
