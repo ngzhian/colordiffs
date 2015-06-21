@@ -74,14 +74,14 @@ class TestDiff(unittest.TestCase):
 
     def test_chunks(self):
         diff = Diff(SINGLE_DIFF)
-        chunks = diff.parse_chunks()
+        chunks = list(diff.parse_chunks())
         self.assertEqual(
             ['@@ -1,1 +1,2 @@ class Klass', ' line 1', '+line 2'],
-            chunks[0]
+            chunks[0].spec
         )
         self.assertEqual(
             ['@@ -11,1 +11,1 @@ class Klass', '-line 1', '+line 2'],
-            chunks[1]
+            chunks[1].spec
         )
 
 

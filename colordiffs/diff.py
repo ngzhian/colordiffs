@@ -6,12 +6,14 @@ __all__ = ['Diff']
 
 
 def parse_diff_output(text):
-    diffs = [Diff(d) for d in split_diffs(text)]
-    return diffs
+    """Make a Diff out of each diff section"""
+    return map(Diff, split_diffs(text))
 
 
 def split_diffs(text):
-    """Split up a diff output into an interator of diffs"""
+    """Split up a diff output, which can potentially contain
+    multiple diffs, into a list of Diff objects
+    """
     arr = []
     for t in text:
         if t.startswith('diff') and len(arr) != 0:
@@ -32,21 +34,21 @@ class Diff():
     def parse_diff(self):
         self.header = self.diff[0].strip()
         index = self.diff[1].strip()
+
         if index.startswith('index'):
-            self.index = index
-            self.line_a = self.diff[2].strip()
-            self.line_b = self.diff[3].strip()
-            self.spec = self.diff[4:]
+            index_line = 1
         else:
             self.file_mode = self.diff[1].strip()
-            self.index = self.diff[2].strip()
-            self.line_a = self.diff[3].strip()
-            self.line_b = self.diff[4].strip()
-            self.spec = self.diff[5:]
+            index_line = 2
+
+        self.index = self.diff[index_line].strip()
+        self.line_a = self.diff[index_line + 1].strip()
+        self.line_b = self.diff[index_line + 2].strip()
+        self.spec = self.diff[index_line + 3:]
 
         self.commits = self.parse_commits()
         self.file_a, self.file_b = self.parse_filenames()
-        self.dcs = [DiffChunk(c) for c in self.parse_chunks()]
+        self.dcs = self.parse_chunks()
 
     def parse_commits(self):
         splits = re.split('\.\.| ', self.index)
@@ -61,7 +63,7 @@ class Diff():
         return file1[2:].strip(), file2[2:].strip()
 
     def parse_chunks(self):
-        return list(self.iter_chunks())
+        return map(DiffChunk, self.iter_chunks())
 
     def iter_chunks(self):
         part = []
@@ -75,41 +77,45 @@ class Diff():
 
 
 class DiffChunk():
+    """A Diff is tied to a file, and each file can have multiple
+    little diffs corresponding to changes in different
+    parts of that file.
+    Each of this portion is called a DiffChunk
+    """
     def __init__(self, spec):
-        """spec is a list of lines"""
-        self._spec = spec
+        self.spec = spec
         self.parse_spec()
 
     def parse_spec(self):
-        self.diff_line = self._spec[0]
-        self.output_instructions = self._spec[1:]
+        """
+        parses a diff line that looks like this:
+
+            @@ -1,29 +0,0 @@
+        """
+        self.diff_line = self.spec[0]
+        self.output_instructions = self.spec[1:]
 
         _, line_spec, _ = self.diff_line.split('@@')
         a_spec, b_spec = line_spec.strip().split(' ')
 
-        a_start, a_more = a_spec.split(',')
-        self.a_hunk = DiffHunk(a_start[1:], a_more)
+        self.a_hunk = self.parse_hunk(a_spec)
+        self.b_hunk = self.parse_hunk(b_spec)
 
-        b_start, b_more = b_spec.split(',')
-        self.b_hunk = DiffHunk(b_start[1:], b_more)
+    def parse_hunk(self, spec):
+        start, more = spec.split(',')
+        return DiffHunk(start[1:], more)
 
 
 class DiffHunk():
+    """A DiffChunk is made up of 2 DiffHunks,
+    one for the old content and one for the new contents.
+    """
     def __init__(self, start_line, num_lines):
         self.start_line = int(start_line)
         self.curr_offset = -1
         self.num_lines = int(num_lines)
 
     def get_current_line(self, colorized):
-        """
-        >>> dh = DiffHunk(1, 3, ['a', 'b', 'c'])
-        >>> dh.get_current_line()
-        'a'
-        >>> dh.get_current_line()
-        'b'
-        >>> dh.get_current_line()
-        'c'
-        """
         if self.curr_offset >= self.num_lines:
             raise Exception()
         self.curr_offset += 1
