@@ -31,16 +31,29 @@ class Diff():
 
     def parse_diff(self):
         self.header = self.diff[0].strip()
-        self.index = self.diff[1].strip()
-        self.line_a = self.diff[2].strip()
-        self.line_b = self.diff[3].strip()
-        self.spec = self.diff[4:]
+        index = self.diff[1].strip()
+        if index.startswith('index'):
+            self.index = index
+            self.line_a = self.diff[2].strip()
+            self.line_b = self.diff[3].strip()
+            self.spec = self.diff[4:]
+        else:
+            self.file_mode = self.diff[1].strip()
+            self.index = self.diff[2].strip()
+            self.line_a = self.diff[3].strip()
+            self.line_b = self.diff[4].strip()
+            self.spec = self.diff[5:]
+
         self.commits = self.parse_commits()
         self.file_a, self.file_b = self.parse_filenames()
         self.dcs = [DiffChunk(c) for c in self.parse_chunks()]
 
     def parse_commits(self):
-        _, old, new, __ = re.split('\.\.| ', self.index)
+        splits = re.split('\.\.| ', self.index)
+        if len(splits) == 3:
+            _, old, new = splits
+        else:
+            _, old, new, _ = splits
         return [old, new]
 
     def parse_filenames(self):

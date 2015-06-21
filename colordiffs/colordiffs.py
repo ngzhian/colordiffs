@@ -50,6 +50,10 @@ def colorize(code, filename=None):
 
 
 def file_contents_at_commit(git_obj, filename):
+    # this commit is an add/remove file
+    if git_obj == '0000000':
+        return ''
+
     f = open(os.devnull, 'w')
     try:
         # this is probably HEAD, just use cat to get file contents

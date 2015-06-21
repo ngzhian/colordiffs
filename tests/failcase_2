@@ -1,20 +1,35 @@
-diff --git a/test/run.py b/test/run.py
-index d730914..a48e1fb 100755
---- a/test/run.py
-+++ b/test/run.py
-@@ -290,12 +290,9 @@ def collect_dir_tests(base_dir, test_files, check_thirdparty=False):
-                     skip = 'Thirdparty-Library %s not found.' % lib
- 
-             path = os.path.join(base_dir, f_name)
--
--            if is_py3:
--                source = open(path, encoding='utf-8').read()
--            else:
--                source = unicode(open(path).read(), 'UTF-8')
--
-+            source = open(path).read()
-+            if not is_py3:
-+                source = unicode(source, 'UTF-8')
-             for case in collect_file_tests(StringIO(source),
-                                            lines_to_execute):
-                 case.path = path
+diff --git a/tests/failcase b/tests/failcase
+deleted file mode 100644
+index a6ccc01..0000000
+--- a/tests/failcase
++++ /dev/null
+@@ -1,29 +0,0 @@
+-diff --git a/test/completion/keywords.py b/test/completion/keywords.py
+-index ba56c21..851140b 100644
+---- a/test/completion/keywords.py
+-+++ b/test/completion/keywords.py
+-@@ -4,24 +4,3 @@ raise
+- 
+- #? ['except', 'Exception']
+- except
+--
+--#? []
+--b + continu
+--
+--#? []
+--b + continue
+--
+--#? ['continue']
+--b; continue
+--
+--#? ['continue']
+--b; continu
+--
+--#? []
+--c + brea
+--
+--#? []
+--a + break
+--
+--#? ['break']
+--b; break
