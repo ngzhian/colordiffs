@@ -1,3 +1,8 @@
+v0.1.8
+======
+
+* bugfix for diffs where files are added
+
 v0.1.7
 ======
 
