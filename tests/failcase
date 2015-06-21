@@ -1,0 +1,29 @@
+diff --git a/test/completion/keywords.py b/test/completion/keywords.py
+index ba56c21..851140b 100644
+--- a/test/completion/keywords.py
++++ b/test/completion/keywords.py
+@@ -4,24 +4,3 @@ raise
+ 
+ #? ['except', 'Exception']
+ except
+-
+-#? []
+-b + continu
+-
+-#? []
+-b + continue
+-
+-#? ['continue']
+-b; continue
+-
+-#? ['continue']
+-b; continu
+-
+-#? []
+-c + brea
+-
+-#? []
+-a + break
+-
+-#? ['break']
+-b; break
