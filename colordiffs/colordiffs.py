@@ -10,7 +10,7 @@ from pygments.token import Text
 from pygments.util import ClassNotFound
 
 from .output import output
-from .diff import Diff
+from .diff import parse_diff_output
 from .utils import NoneLexer
 
 
@@ -18,7 +18,6 @@ def colordiffs(diff):
     """Diff is a list of lines from a diff output"""
     old_commit, new_commit = diff.commits[0], diff.commits[1]
     file1, file2 = diff.file_a, diff.file_b
-
 
     old_code = colorize(
         file_contents_at_commit(old_commit, file1), file1)
@@ -59,6 +58,6 @@ def file_contents_at_commit(git_obj, filename):
 
 
 def run(diff):
-    a_diff = Diff(diff)
-    a, b = colordiffs(a_diff)
-    output(a_diff, a, b)
+    for a_diff in parse_diff_output(diff):
+        a, b = colordiffs(a_diff)
+        output(a_diff, a, b)
