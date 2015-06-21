@@ -110,11 +110,9 @@ class DiffChunk():
         self.diff_line = self.spec[0]
         self.output_instructions = self.spec[1:]
 
-        _, line_spec, _ = self.diff_line.split('@@')
-        a_spec, b_spec = line_spec.strip().split(' ')
-
-        self.a_hunk = self.parse_hunk(a_spec)
-        self.b_hunk = self.parse_hunk(b_spec)
+        splits = self.diff_line.split()
+        self.a_hunk = self.parse_hunk(splits[1])
+        self.b_hunk = self.parse_hunk(splits[2])
 
     def parse_hunk(self, spec):
         start, more = spec.split(',')
