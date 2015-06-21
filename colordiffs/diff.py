@@ -34,50 +34,31 @@ class Diff():
         self.index = self.diff[1].strip()
         self.line_a = self.diff[2].strip()
         self.line_b = self.diff[3].strip()
-
         self.spec = self.diff[4:]
-
-        self.parse_commits()
-        self.grab_filename()
-        self.read_chunks()
-
-        self.dcs = []
-        for chunk in self.chunks:
-            self.dcs.append(DiffChunk(chunk))
+        self.commits = self.parse_commits()
+        self.file_a, self.file_b = self.parse_filenames()
+        self.dcs = [DiffChunk(c) for c in self.parse_chunks()]
 
     def parse_commits(self):
         _, old, new, __ = re.split('\.\.| ', self.index)
-        self.commits = [old, new]
+        return [old, new]
 
-    def grab_filename(self):
+    def parse_filenames(self):
         _, _, file1, file2 = self.header.split(' ')
         return file1[2:].strip(), file2[2:].strip()
 
-    def read_chunks(self):
-        started = False
-        start_no = 0
-        chunks = []
-        for no, line in enumerate(self.spec):
-            if line.startswith('@@'):
-                if not started:
-                    started = True
-                    start_no = no
-                    continue
-                chunk = self.spec[start_no:no]
-                chunks.append(chunk)
-                start_no = no
-        chunk = self.spec[start_no:]
-        chunks.append(chunk)
-        self.chunks = chunks
+    def parse_chunks(self):
+        return list(self.iter_chunks())
 
-    def output(self, colorized_a, colorized_b):
-        print(discreet(self.header))
-        print(discreet(self.index))
-        print(discreet(self.line_a))
-        print(discreet(self.line_b))
-        for dc in self.dcs:
-            for o in dc.output(colorized_a, colorized_b):
-                print(o)
+    def iter_chunks(self):
+        part = []
+        for no, line in enumerate(self.spec):
+            if line.startswith('@@') and len(part) != 0:
+                yield part
+                part = [line]
+            else:
+                part.append(line)
+        yield part
 
 
 class DiffChunk():
@@ -98,18 +79,6 @@ class DiffChunk():
 
         b_start, b_more = b_spec.split(',')
         self.b_hunk = DiffHunk(b_start[1:], b_more)
-
-    def output(self, colorized_a, colorized_b):
-        results = [discreet(self.diff_line)]
-        for instr in self.output_instructions:
-            if instr[0] == ' ':
-                results.append(' ' + self.a_hunk.get_current_line(colorized_a))
-                self.b_hunk.get_current_line(colorized_b)  # for side effect
-            if instr[0] == '-':
-                results.append(red_bg('-') + self.a_hunk.get_current_line(colorized_a))
-            if instr[0] == '+':
-                results.append(green_bg('+') + self.b_hunk.get_current_line(colorized_b))
-        return results
 
 
 class DiffHunk():

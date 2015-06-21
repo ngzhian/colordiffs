@@ -69,18 +69,19 @@ class TestDiff(unittest.TestCase):
 
     def test_filename(self):
         diff = Diff(SINGLE_DIFF)
-        self.assertEqual(('.vimrc', '.vimrc'), diff.grab_filename())
+        self.assertEqual('.vimrc', diff.file_a)
+        self.assertEqual('.vimrc', diff.file_b)
 
     def test_chunks(self):
         diff = Diff(SINGLE_DIFF)
-        diff.read_chunks()
+        chunks = diff.parse_chunks()
         self.assertEqual(
             ['@@ -1,1 +1,2 @@ class Klass', ' line 1', '+line 2'],
-            diff.chunks[0]
+            chunks[0]
         )
         self.assertEqual(
             ['@@ -11,1 +11,1 @@ class Klass', '-line 1', '+line 2'],
-            diff.chunks[1]
+            chunks[1]
         )
 
 
