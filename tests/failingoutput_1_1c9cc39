@@ -1,0 +1,31 @@
+[user]
+    name = Ng Zhi An
+    email = ngzhian@gmail.com
+[color]
+    ui = true
+[core]
+	excludesfile = ~/.gitignore
+[alias]
+    st = status
+    ci = commit --verbose
+    cm = commit -m
+    co = checkout
+    cob = checkout -b
+    di = diff
+    dc = diff --cached
+    amend = commit --amend
+    aa = add --all
+    ap = add -p
+    ff = merge --ff-only
+    pullff = pull --ff-only
+    noff = merge --no-ff
+    fa = fetch --all
+    pom = push origin master
+    poh = push origin HEAD
+    b = branch
+    ds = diff --stat=160,120
+    dh1 = diff HEAD~1
+    pop = stash pop
+    list = stash list
+[merge]
+    tool = vimdiff

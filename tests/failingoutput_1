@@ -1,0 +1,11 @@
+diff --git a/.gitconfig b/.gitconfig
+index 1c9cc39..0fce5b0 100644
+--- a/.gitconfig
++++ b/.gitconfig
+@@ -27,5 +27,6 @@
+     dh1 = diff HEAD~1
+     pop = stash pop
+     list = stash list
++    rdev = rebase develop
+ [merge]
+     tool = vimdiff
