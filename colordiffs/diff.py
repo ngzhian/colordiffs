@@ -35,20 +35,35 @@ class Diff():
         self.header = self.diff[0].strip()
         index = self.diff[1].strip()
 
+        # handle multiple kinds of diff
+        # these are called 'extended headers' and it's variosu
+        # formats can be found in the `git diff` man page
         if index.startswith('index'):
             index_line = 1
+            skip = False
+        elif index.startswith('new'):
+            index_line = 2
+            skip = True
         else:
+            skip = False
             self.file_mode = self.diff[1].strip()
             index_line = 2
 
         self.index = self.diff[index_line].strip()
-        self.line_a = self.diff[index_line + 1].strip()
-        self.line_b = self.diff[index_line + 2].strip()
-        self.spec = self.diff[index_line + 3:]
 
         self.commits = self.parse_commits()
         self.file_a, self.file_b = self.parse_filenames()
-        self.dcs = self.parse_chunks()
+
+        if skip:
+            self.line_a = None
+            self.line_b = None
+            self.line_spec = None
+            self.dcs = []
+        else:
+            self.line_a = self.diff[index_line + 1].strip()
+            self.line_b = self.diff[index_line + 2].strip()
+            self.spec = self.diff[index_line + 3:]
+            self.dcs = self.parse_chunks()
 
     def parse_commits(self):
         splits = re.split('\.\.| ', self.index)

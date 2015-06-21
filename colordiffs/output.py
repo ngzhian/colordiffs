@@ -17,8 +17,10 @@ def output_diff_chunk(dc, colorized_a, colorized_b):
 def output(diff, colorized_a, colorized_b):
     print(discreet(diff.header))
     print(discreet(diff.index))
-    print(discreet(diff.line_a))
-    print(discreet(diff.line_b))
+    if (diff.line_a):
+        print(discreet(diff.line_a))
+    if (diff.line_b):
+        print(discreet(diff.line_b))
     for dc in diff.dcs:
         for o in output_diff_chunk(dc, colorized_a, colorized_b):
             print(o)
