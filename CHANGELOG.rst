@@ -1,3 +1,11 @@
+v0.1.6
+======
+
+* fix a bug where code starting with new lines are stripped, leading
+  to exceptions when printing the colored code
+* more test cases
+
+
 v0.1.5
 ======
 
